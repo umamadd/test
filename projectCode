@@ -53,6 +53,199 @@ def dropTable():
 
 dropTable()
 createTable()
+########################################################################################################
+import tkinter as tk
+from tkinter import ttk, messagebox
+from tkinter import StringVar
+from customtkinter import CTk, CTkLabel, CTkEntry, CTkComboBox, CTkButton
+import EMPLOYEE_DATABASE
+
+app = CTk()
+app.title('Employee Management System')
+app.geometry('1280x720')
+app.config(bg='#FAEBD7')
+app.resizable(False, False)
+
+font1 = ('Arial', 20, 'bold')
+font2 = ('Arial', 12, 'bold')
+
+
+text_color = 'black'
+bg_color = '#EED5B7'
+entry_color = '#CDAA7D'
+entry_fg_color = '#F5F5DC'
+entry_border_color = 'black'
+button_color = '#EED5B7'
+button_hover_color = '#CDAA7D'
+button_bg_color = '#EED5B7'
+button_border_color = 'brown'
+delete_button_fg_color = '#EED5B7'
+delete_button_hover_color = 'red'
+
+def display_data(event):
+    selected_item = tree.focus()
+    if selected_item:
+        row = tree.item(selected_item)['values']
+        clear()
+        id_entry.insert(0, row[0])
+        name_entry.insert(0, row[1])
+        gender_entry.set(row[2])
+        age_entry.delete(0, tk.END)
+        age_entry.insert(0, row[3])
+        pay_entry.delete(0, tk.END)
+        pay_entry.insert(0, row[4])
+    else:
+        pass
+
+def add_to_treeview():
+    employees = EMPLOYEE_DATABASE.getEmployees()
+    tree.delete(*tree.get_children())
+    for employee in employees:
+        tree.insert('', tk.END, values=employee)
+
+def clear(*clicked):
+    if clicked:
+        tree.selection_remove(tree.focus())
+    id_entry.delete(0, tk.END)
+    name_entry.delete(0, tk.END)
+    gender_entry.set('Male')
+    age_entry.delete(0, tk.END)
+    pay_entry.delete(0, tk.END)
+
+def delete():
+    selected_item = tree.focus()
+    if not selected_item:
+        messagebox.showerror('Error', 'Choose an employee to delete.')
+    else:
+        id = id_entry.get()
+        EMPLOYEE_DATABASE.removeEmployee(id)
+        add_to_treeview()
+        clear()
+        messagebox.showinfo('Success', 'Data has been deleted.')
+
+def update():
+    selected_item = tree.focus()
+    if not selected_item:
+        messagebox.showerror('Error', 'Choose an employee to update.')
+    else:
+        id = id_entry.get()
+        name = name_entry.get()
+        gender = gender_entry.get()
+        age = age_entry.get()
+        pay = pay_entry.get()
+        EMPLOYEE_DATABASE.modifyEmployee(name, gender, age, pay, id)
+        add_to_treeview()
+        clear()
+        messagebox.showinfo('Success', 'Data has been updated.')
+
+def insert():
+    id = id_entry.get()
+    name = name_entry.get()
+    gender = gender_entry.get()
+    age = age_entry.get()
+    pay = pay_entry.get()
+    if not (id and name and gender and age and pay):
+        messagebox.showerror('Error', 'Enter all fields.')
+    else:
+        EMPLOYEE_DATABASE.createEmployee(id, name, gender, age, pay)
+        add_to_treeview()
+        clear()
+        messagebox.showinfo('Success', 'Data has been inserted.')
+
+id_label = CTkLabel(app, font=font1, text='ID:', text_color=text_color, bg_color=bg_color)
+id_label.place(x=20, y=20)
+
+id_entry = CTkEntry(app, font=font1, text_color=entry_color, fg_color=entry_fg_color,
+                    border_color=entry_border_color, border_width=2, width=180)
+id_entry.place(x=100, y=20)
+
+name_label = CTkLabel(app, font=font1, text='Name:', text_color=text_color, bg_color=bg_color)
+name_label.place(x=20, y=80)
+
+name_entry = CTkEntry(app, font=font1, text_color=entry_color, fg_color=entry_fg_color,
+                      border_color=entry_border_color, border_width=2, width=180)
+name_entry.place(x=100, y=80)
+
+gender_label = CTkLabel(app, font=font1, text='Gender:', text_color=text_color, bg_color=bg_color)
+gender_label.place(x=20, y=140)
+
+options = ['Male', 'Female']
+gender_entry = StringVar()
+
+gender_options = CTkComboBox(app, font=font1, text_color=entry_color, fg_color=entry_fg_color,
+                             dropdown_hover_color=entry_border_color, button_color=entry_border_color,
+                             button_hover_color=entry_border_color, border_color=entry_border_color, width=180,
+                             variable=gender_entry, values=options, state='readonly')
+gender_options.set('Male')
+gender_options.place(x=100, y=140)
+
+age_label = CTkLabel(app, font=font1, text='Age:', text_color=text_color, bg_color=bg_color)
+age_label.place(x=20, y=200)
+
+age_entry = CTkEntry(app, font=font1, text_color=entry_color, fg_color=entry_fg_color,
+                     border_color=entry_border_color, border_width=2, width=180)
+age_entry.place(x=100, y=200)
+
+pay_label = CTkLabel(app, font=font1, text='Pay:', text_color=text_color, bg_color=bg_color)
+pay_label.place(x=20, y=260)
+
+pay_entry = CTkEntry(app, font=font1, text_color=entry_color, fg_color=entry_fg_color,
+                     border_color=entry_border_color, border_width=2, width=180)
+pay_entry.place(x=100, y=260)
+
+tree = ttk.Treeview(app, height=15)
+
+tree['columns'] = ('ID', 'Name', 'Gender', 'Age', 'Pay')
+
+tree.column('#0', width=0, stretch=tk.NO)
+tree.column('ID', anchor=tk.CENTER, width=120)
+tree.column('Name', anchor=tk.CENTER, width=120)
+tree.column('Gender', anchor=tk.CENTER, width=100)
+tree.column('Age', anchor=tk.CENTER, width=100)
+tree.column('Pay', anchor=tk.CENTER, width=100)
+
+tree.heading('ID', text='ID')
+tree.heading('Name', text='Name')
+tree.heading('Gender', text='Gender')
+tree.heading('Age', text='Age')
+tree.heading('Pay', text='Pay')
+
+tree.bind("<ButtonRelease>", display_data)
+tree.place(x=300, y=20)
+
+add_to_treeview()
+
+add_button = CTkButton(app, command=insert, font=font1, text_color=text_color, text='Add Employee',
+                       fg_color=button_color, hover_color=button_hover_color, bg_color=button_bg_color,
+                       cursor='hand2', corner_radius=15, width=260)
+add_button.place(x=20, y=310)
+
+clear_button = CTkButton(app, command=lambda: clear(True), font=font1, text_color=text_color,
+                         text='New Employee', fg_color=bg_color, hover_color=delete_button_hover_color,
+                         bg_color=bg_color, border_color=button_border_color, border_width=2,
+                         cursor='hand2', corner_radius=15, width=260)
+clear_button.place(x=20, y=360)
+
+update_button = CTkButton(app, command=update, font=font1, text_color=text_color,
+                          text='Update Employee', fg_color=bg_color, hover_color=delete_button_hover_color,
+                          bg_color=bg_color, border_color=button_border_color, border_width=2,
+                          cursor='hand2', corner_radius=15, width=260)
+update_button.place(x=300, y=360)
+
+delete_button = CTkButton(app, command=delete, font=font1, text_color=text_color,
+                          text='Delete Employee', fg_color=delete_button_fg_color,
+                          hover_color=delete_button_hover_color, bg_color=button_bg_color,
+                          border_color=delete_button_hover_color, border_width=2,
+                          cursor='hand2', corner_radius=15, width=260)
+delete_button.place(x=580, y=360)
+
+style = ttk.Style(app)
+
+style.theme_use('clam')
+style.configure('Treeview', font=font2, foreground=text_color, background=bg_color, fieldbackground='#313837')
+style.map('Treeview', background=[('selected', '#1A8F2D')])
+
+app.mainloop()
 
 
 

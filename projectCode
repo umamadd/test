@@ -1,0 +1,64 @@
+import sqlite3
+
+def createTable():
+    connection = sqlite3.connect("Employees.db")
+    c= connection.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS Employees (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    gender TEXT,
+    age INTEGER,
+    pay INTEGER)
+    ''')
+    connection.commit()
+    connection.close()
+
+def getEmployees():
+    connection = sqlite3.connect("Employees.db")
+    c = connection.cursor()
+    c.execute('SELECT * FROM Employees')
+    employees = c.fetchall()
+    c.close()
+    return employees
+
+def createEmployee(id,name,gender,age,pay):
+    connection = sqlite3.connect("Employees.db")
+    c = connection.cursor()
+    c.execute('INSERT INTO Employees (id,name,gender,age,pay) VALUES (?,?,?,?,?)',(id,name,gender,age,pay))
+    connection.commit()
+    connection.close()
+
+def modifyEmployee(newName, newGender, newAge, newPay, id):
+    connection = sqlite3.connect("Employees.db")
+    c = connection.cursor()
+    c.execute("UPDATE Employees SET name = ?, gender = ?, age =?, pay=? WHERE id = ?",
+            (newName, newGender, newAge, newPay, id))
+    connection.commit()
+    connection.close()
+
+def removeEmployee(id):
+    connection = sqlite3.connect("Employees.db")
+    c = connection.cursor()
+    c.execute('DELETE FROM Employees WHERE id = ? ', (id,))
+    connection.commit()
+    connection.close()
+
+def dropTable():
+    connection = sqlite3.connect("Employees.db")
+    c = connection.cursor()
+    c.execute('''DROP TABLE IF EXISTS Employees''')
+    connection.commit()
+    connection.close()
+
+dropTable()
+createTable()
+
+
+
+
+
+
+
+
+
